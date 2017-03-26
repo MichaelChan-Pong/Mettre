@@ -14,11 +14,20 @@ static VibePattern pat = {
     .num_segments = ARRAY_LENGTH(segments),
 };
 
+int float_time_ms() {
+	time_t seconds;
+	uint16_t milliseconds;
+	time_ms(&seconds, &milliseconds);
+	return seconds * 1000 + (milliseconds);
+}
+
 void vibrate(){
+  double start = float_time_ms();
   int interval = (double)(60.0 / tempo) * 1000;
   vibes_enqueue_custom_pattern(pat);
   if(active){
-    update_met = app_timer_register(interval, vibrate, NULL); 
+    double time = float_time_ms() - start;
+    update_met = app_timer_register(interval - time, vibrate, NULL); 
   } else {
     app_timer_cancel(update_met);
   }
@@ -56,10 +65,6 @@ static void set_text(){
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   active ^= true; //toggle metronome
-//   char *buf = malloc(sizeof(char));    /* <-- implicit NUL-terminator at the end here */
-//   buf = itoa10(interval, buf);
-//   APP_LOG(APP_LOG_LEVEL_DEBUG, buf);
-//   int interval = 500;
   set_text(); 
   vibrate();
 }
