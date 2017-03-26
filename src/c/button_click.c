@@ -6,6 +6,23 @@ static Window *window;
 static TextLayer *text_layer;
 static int tempo = 120;
 static bool active = false;
+static AppTimer * update_met;
+
+static const uint32_t const segments[] = { 100 };
+static VibePattern pat = {
+    .durations = segments,
+    .num_segments = ARRAY_LENGTH(segments),
+};
+
+void vibrate(){
+  int interval = (double)(60.0 / tempo) * 1000;
+  vibes_enqueue_custom_pattern(pat);
+  if(active){
+    update_met = app_timer_register(interval, vibrate, NULL); 
+  } else {
+    app_timer_cancel(update_met);
+  }
+}
 
 char *itoa10 (int value, char *result){
     char const digit[] = "0123456789";
@@ -39,15 +56,12 @@ static void set_text(){
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   active ^= true; //toggle metronome
-  set_text();
-  double interval = tempo / SECONDS_PER_MINUTE;
-  static const uint32_t const segments[] = {100, 100};
-  VibePattern *pat = malloc(sizeof(VibePattern));
-  pat->durations = segments;
-  pat->num_segments = ARRAY_LENGTH(segments);
-  while(active){
-    app_timer_register(interval, &vibes_enqueue_custom_pattern, pat);
-  }
+//   char *buf = malloc(sizeof(char));    /* <-- implicit NUL-terminator at the end here */
+//   buf = itoa10(interval, buf);
+//   APP_LOG(APP_LOG_LEVEL_DEBUG, buf);
+//   int interval = 500;
+  set_text(); 
+  vibrate();
 }
   
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
