@@ -1,0 +1,25 @@
+{
+    "author": "chenshiming@ufl.edu",
+    "dependencies": {},
+    "keywords": [],
+    "name": "metronome",
+    "pebble": {
+        "displayName": "Metronome",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "25570b71-c81e-4d35-97da-1596f63abcec",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.0.0"
+}
