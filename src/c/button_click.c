@@ -7,10 +7,17 @@ static TextLayer *text_layer;
 static int tempo = 120;
 static bool active = false;
 static AppTimer * update_met;
+static int beat = 1;
+static int beatAmount = 4;
 
 static const uint32_t const segments[] = { 100 };
+static const uint32_t const longSegs[] = { 150 };
 static VibePattern pat = {
     .durations = segments,
+    .num_segments = ARRAY_LENGTH(segments),
+};
+static VibePattern longPat = {
+    .durations = longSegs,
     .num_segments = ARRAY_LENGTH(segments),
 };
 
@@ -24,13 +31,21 @@ int float_time_ms() {
 void vibrate(){
   double start = float_time_ms();
   int interval = (double)(60.0 / tempo) * 1000;
-  vibes_enqueue_custom_pattern(pat);
+  if(beat == 1)
+    vibes_enqueue_custom_pattern(longPat);
+  else
+    vibes_enqueue_custom_pattern(pat);
+  if(beat == beatAmount)
+    beat = 1;
+  else
+    beat++;
   if(active){
     double time = float_time_ms() - start;
     update_met = app_timer_register(interval - time, vibrate, NULL); 
   } else {
     app_timer_cancel(update_met);
-  }
+    beat = 1;
+  } 
 }
 
 char *itoa10 (int value, char *result){
@@ -83,6 +98,13 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   }
 }
 
+static void up_hold_handler(ClickRecognizerRef recognizer, void *context) {
+  if(active && tempo < MAX_TEMPO){
+    tempo++;
+    set_text();
+  }
+}
+
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
@@ -94,7 +116,7 @@ static void window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
 
   text_layer = text_layer_create(GRect(0, 66, bounds.size.w, 40));
-  text_layer_set_text(text_layer, "Start >");
+  text_layer_set_text(text_layer, "Start ->");
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK));
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
@@ -106,6 +128,7 @@ static void window_unload(Window *window) {
 
 static void init(void) {
   window = window_create();
+  window_set_background_color(window, GColorCobaltBlue);
   window_set_click_config_provider(window, click_config_provider);
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,

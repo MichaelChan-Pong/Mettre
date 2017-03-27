@@ -2,9 +2,9 @@
     "author": "chenshiming@ufl.edu",
     "dependencies": {},
     "keywords": [],
-    "name": "metronome",
+    "name": "mettre",
     "pebble": {
-        "displayName": "Metronome",
+        "displayName": "Mettre",
         "enableMultiJS": true,
         "messageKeys": [],
         "projectType": "native",
